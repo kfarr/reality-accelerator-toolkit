@@ -19,7 +19,9 @@ import {
 	SphereGeometry,
 	Vector3,
 	WebGLRenderer,
+	DoubleSide
 } from 'three';
+import * as Tone from 'tone';
 
 import { Text } from 'troika-three-text';
 import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerModelFactory.js';
@@ -45,6 +47,18 @@ function init() {
 	setupController();
 	window.addEventListener('resize', onWindowResize);
 	setupRATK();
+	setupScene();
+}
+
+/**
+ * Creates black sky sphere to block out AR camera
+ */
+function setupScene() {
+	const geometry = new SphereGeometry(150);
+	const material = new MeshBasicMaterial({color: 0x000000, side: DoubleSide});
+	const skySphere = new Mesh(geometry, material);
+	// this.hitTestTarget.add(hitTestMarker);
+	scene.add(skySphere)
 }
 
 /**
@@ -55,7 +69,7 @@ function setupCamera() {
 		50,
 		window.innerWidth / window.innerHeight,
 		0.1,
-		10,
+		200,
 	);
 	camera.position.set(0, 1.6, 3);
 }
@@ -298,7 +312,13 @@ function buildAnchorMarker(anchor, isRecovered) {
 	console.log(
 		`anchor created (id: ${anchor.anchorID}, isPersistent: ${anchor.isPersistent}, isRecovered: ${isRecovered})`,
 	);
-}
+	const synth = new Tone.Synth().toDestination();
+	const now = Tone.now()
+	const notes = ["C4", "E4", "G4"];
+	const randomIndex = Math.floor(Math.random() * notes.length);
+	const randomNote = notes[randomIndex];
+	synth.triggerAttack(randomNote, "8n")
+	}
 
 /**
  * Updates semantic labels for each mesh.
